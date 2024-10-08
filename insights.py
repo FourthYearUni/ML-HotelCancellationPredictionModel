@@ -8,6 +8,7 @@ to derive insights from the data.
 
 from cleaner import Cleaner
 from typing import List
+from plots import Charts
 
 
 class Insights:
@@ -46,6 +47,15 @@ class Insights:
         return [resort_perc, city_perc]
 
 
-insight = Insights()
+if __name__ == "main":
+    insight = Insights()
+    plots = Charts()
 
-print(insight.cancellation_percentage_per_hotel())
+    values = insight.cancellation_percentage_per_hotel()
+    properties = ["% City Hotel", "% Resort Hotel"]
+    y_axis_label = "Percentage of cancellation"
+    title = "Percentage of cancellation per type of hotel"
+
+    plt = plots.bar_chart(values, properties, y_axis_label, title)
+
+    plt.show()
