@@ -6,6 +6,7 @@ Provides methods to plot data. The methods are data agnostic for reuse.
 """
 
 import matplotlib.pyplot as plt
+import random
 
 
 class Charts:
@@ -22,7 +23,10 @@ class Charts:
         """
         fig, ax = plt.subplots()
         labels = properties
-        ax.bar(properties, values, label=labels)
+        colors = [
+            (random.random(), random.random(), random.random(), 1) for value in values
+        ]
+        ax.bar(properties, values, label=labels, color=colors)
         ax.set_ylabel(y_axis_lbl)
         ax.legend(title=title)
 
