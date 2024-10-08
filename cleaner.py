@@ -56,7 +56,7 @@ class Cleaner:
     """
 
     def __init__(self):
-        self.data_frame = pd.read_csv("hotel_bookings.csv")
+        self.data_frame: DataFrame = pd.read_csv("hotel_bookings.csv")
 
     def validate_row(self, row) -> Booking | None:
         """
@@ -73,6 +73,22 @@ class Cleaner:
         """
         Validates the whole frame and returns a valid data frame cleaned up.
         """
+        # Perform a fill based on the mean value
+        self.data_frame["children"] = self.data_frame["children"].fillna(
+            self.data_frame.groupby("children")["children"].transform("mean")
+        )
+
+        # Perform a text filling as the datatype is text
+        self.data_frame["country"] = self.data_frame["country"].fillna("N/A")
+
+        # Perform a backward fill to allow data at the top to be filled
+        self.data_frame["agent"] = self.data_frame["agent"].bfill()
+        self.data_frame["company"] = self.data_frame["company"].bfill()
+
+        # Perform a backward fill to allow data from the bottom to be filled
+        self.data_frame["agent"] = self.data_frame["agent"].ffill()
+        self.data_frame["company"] = self.data_frame["company"].ffill()
+
         dropped = self.data_frame.dropna()
         valid_series = dropped.apply(self.validate_row, axis=1)
         valid_df = DataFrame([booking.dict() for booking in valid_series])
@@ -80,4 +96,5 @@ class Cleaner:
 
 
 cleaner = Cleaner()
-print(cleaner.validate_data())
+cleaner.validate_data()
+# print(cleaner.validate_data())
