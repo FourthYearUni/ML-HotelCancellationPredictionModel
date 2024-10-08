@@ -95,6 +95,7 @@ class Cleaner:
         return valid_df
 
 
-cleaner = Cleaner()
-cleaner.validate_data()
-# print(cleaner.validate_data())
+if __name__ == "__main__":
+    cleaner = Cleaner()
+    cleaner.validate_data()
+    # print(cleaner.validate_data())
