@@ -47,7 +47,7 @@ class Insights:
         return [resort_perc, city_perc]
 
 
-if __name__ == "main":
+if __name__ == "__main__":
     insight = Insights()
     plots = Charts()
 
