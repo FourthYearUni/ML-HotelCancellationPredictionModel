@@ -34,6 +34,18 @@ class Charts:
 
         return pylt
 
+    def line_chart(self, properties: list, values: list, labels: str, title: str):
+        """
+        Creates a line chart using a list of provided values and properties.
+        """
+        # Create a line chart
+        pylt.figure(figsize=(8, 6))
+        pylt.plot(properties, values, marker="o", linestyle="-")
+        pylt.title(title)
+        pylt.xlabel(labels[0])
+        pylt.ylabel(labels[1])
+        pylt.grid(True)
+
 
 class Maps:
     """

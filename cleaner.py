@@ -57,6 +57,11 @@ class Cleaner:
 
     def __init__(self):
         self.data_frame: DataFrame = pd.read_csv("hotel_bookings.csv")
+        self.data_frame["monthYear"] = (
+            self.data_frame["arrival_date_month"]
+            + "/"
+            + self.data_frame["arrival_date_year"].astype(str)
+        )
 
     def validate_row(self, row) -> Booking | None:
         """
