@@ -8,8 +8,8 @@ to derive insights from the data.
 
 from cleaner import Cleaner
 from typing import List
-from plots import Charts
-from pandas import DataFrame, Series
+from plots import Charts, Maps, pylt
+from pandas import DataFrame, Series, crosstab
 from typing import cast
 
 
@@ -77,10 +77,32 @@ class Insights:
         ].count()
         return customer_type
 
+    def get_returning_guests(self) -> float:
+        """
+        Returns a number of returning guests
+        """
+        r_guests = (
+            self.data_frame[(self.data_frame["is_repeated_guest"] == True)].size / 32
+        )
+        return r_guests
+
+    def correlation_between_columns(self, index, columns: list):
+        """
+        Returns a heat map showing the correlation between a passed list of columns
+        It uses cross tabulation to show the frequency distribution of x amount of columns
+        """
+        contingency_tbl = crosstab(
+            index=self.data_frame[index],
+            columns=[self.data_frame[col] for col in columns],
+            normalize="index",
+        )
+        return contingency_tbl
+
 
 if __name__ == "__main__":
     insight = Insights()
     plots = Charts()
+    maps = Maps()
 
     # Printing information about the percentage of cancellations per hotel.
     values = insight.cancellation_percentage_per_hotel()
@@ -110,4 +132,16 @@ if __name__ == "__main__":
     y_axis_label = "Number of bookings"
     title = "Most common type of customers"
     plt_customer_types = plots.bar_chart(values, properties, y_axis_label, title)
-    plt_rooms.show()
+    # plt_rooms.show()
+
+    # Printing the number of the returning customers
+    returning_customers = insight.get_returning_guests()
+
+    # Showing correlation between room types and cancellations
+    # With a plotted crosstab in a heatmap, crosstab because it will allow us to view
+    # The frequency distribution between the two columns
+
+    columns = ["reserved_room_type", "assigned_room_type"]
+    cont_tbl = insight.correlation_between_columns("is_canceled", columns)
+    cont_tbl.to_excel("cont_table.xlsx", sheet_name="Crosstab Data")
+    pylt.show()

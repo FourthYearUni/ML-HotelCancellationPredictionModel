@@ -5,7 +5,9 @@ Provides methods to plot data. The methods are data agnostic for reuse.
 @author: Alain Christian (U2083264)
 """
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as pylt
+import seaborn as sns
+import numpy as np
 import random
 
 
@@ -21,7 +23,7 @@ class Charts:
         """
         Creates a bar chart using a list of provided values and properties.
         """
-        fig, ax = plt.subplots()
+        fig, ax = pylt.subplots()
         labels = properties
         colors = [
             (random.random(), random.random(), random.random(), 1) for value in values
@@ -30,4 +32,23 @@ class Charts:
         ax.set_ylabel(y_axis_lbl)
         ax.legend(title=title)
 
-        return plt
+        return pylt
+
+
+class Maps:
+    """
+    This class presents methods that create various types of maps
+    """
+
+    def __init__(self):
+        pass
+
+    def heat_map(self, contingency_tbl, annot=True, cmap="YlGnBu"):
+        """
+        Creates a heat map with the provided heatmap
+        """
+        pylt.imshow(contingency_tbl, cmap, aspect="auto")
+        pylt.colorbar()
+        pylt.xticks(np.arange(contingency_tbl.shape[1]), contingency_tbl.columns)
+        pylt.yticks(np.arange(contingency_tbl.shape[0]), contingency_tbl.index)
+        return pylt
