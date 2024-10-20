@@ -58,51 +58,6 @@ class Cleaner:
 
     def __init__(self):
         self.data_frame: DataFrame = pd.read_csv("hotel_bookings.csv")
-        months = list(calendar.month_name)[1:]
-
-        """
-        Variable alterations
-        """
-        # Conversion to number format for easy graphical representation
-        self.data_frame["arrival_date_month"] = self.data_frame[
-            "arrival_date_month"
-        ].map(lambda m: months.index(m) + 1)
-
-        self.data_frame["arrival_date_year"] = self.data_frame["arrival_date_year"].map(
-            lambda y: str(y).split("20")[1]
-        )
-        # This was joined to give more context on date sensitive answers.
-        self.data_frame["YearMonth"] = (
-            self.data_frame["arrival_date_year"].astype(str)
-            + "/"
-            + self.data_frame["arrival_date_month"].astype(str)
-        )
-
-        # This is to be able to use the duration.
-        self.data_frame["duration"] = (
-            self.data_frame["stays_in_weekend_nights"]
-            + self.data_frame["stays_in_week_nights"]
-        )
-        self.data_frame = pd.get_dummies(
-            self.data_frame,
-            columns=[
-                "customer_type",
-                "assigned_room_type",
-                "deposit_type",
-                "reservation_status",
-                "meal",
-                "hotel",
-                "arrival_date_month",
-                "country",
-                "market_segment",
-                "distribution_channel",
-                "reserved_room_type",
-                "reservation_status_date",
-                "YearMonth",
-            ],
-        )
-
-        # print(relevant_f)
 
     def validate_row(self, row) -> Booking | None:
         """

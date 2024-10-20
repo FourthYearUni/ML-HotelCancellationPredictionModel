@@ -58,6 +58,7 @@ class Charts:
         pylt.xlabel(labels[0])
         pylt.ylabel(labels[1])
         pylt.grid(True)
+        return pylt
 
     def pie_chart(self, properties: list, values: list, title: str):
         """
