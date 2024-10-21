@@ -58,7 +58,7 @@ class Cleaner:
 
     def __init__(self):
         self.data_frame: DataFrame = pd.read_csv("hotel_bookings.csv")
-
+    @staticmethod
     def validate_row(self, row) -> Booking | None:
         """
         Validates each row in the dataframe against the Booking class.

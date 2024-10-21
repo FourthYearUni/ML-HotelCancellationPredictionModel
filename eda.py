@@ -4,11 +4,11 @@ Provides modules to do exploratory data analysis on given dataframes.
 @author: Alain Mugisha(U2083264)
 """
 
-from pandas import DataFrame, Series
 from matplotlib import pyplot as pylt
-from typing import List
 from plots import Charts, Maps
 from cleaner import Cleaner
+
+from feature_engineering import FeatureEngineering
 
 
 class EDA:
@@ -26,6 +26,9 @@ class EDA:
         self.cleaner = Cleaner()
         self.data_frame = self.cleaner.data_frame
 
+        self.fe = FeatureEngineering(self.data_frame)
+        self.fe.create_month_year()
+        self.fe.create_duration()
     def guests_each_month(self):
         """
         Provides of a graphical representation
@@ -81,7 +84,13 @@ if __name__ == "__main__":
     y_lbl_duration = "Stays"
     x_lbl_duration = "Duration of stays"
     title = "Duration of guest stays"
-    eda.charts.bar_chart(values, properties, y_lbl_duration, title, x_lbl_duration)
+    eda.charts.bar_chart(
+        values=values,
+        properties=properties,
+        y_axis_lbl=y_lbl_duration,
+        title=title,
+        x_axis_lbl=x_lbl_duration
+    )
 
     df_geo_origins = eda.get_geographical_origins()
     properties = df_geo_origins["country"].values.tolist()

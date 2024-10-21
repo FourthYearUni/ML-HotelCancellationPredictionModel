@@ -12,6 +12,7 @@ from plots import Charts, Maps, pylt
 from pandas import DataFrame, Series, crosstab
 from typing import cast
 
+from feature_engineering import FeatureEngineering
 
 class Insights:
     """
@@ -21,6 +22,10 @@ class Insights:
     def __init__(self):
         self.cleaner = Cleaner()
         self.data_frame = self.cleaner.validate_data()
+        self.fe = FeatureEngineering(self.data_frame)
+        self.fe.create_month_year()
+        self.fe.create_duration()
+
 
     def cancellation_percentage_per_hotel(self) -> List:
         """
