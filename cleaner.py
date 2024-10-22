@@ -5,6 +5,7 @@ It will remove any inconsistencies in the data and make it ready for analysis.
 @author: Alain Mugisha(U2083264)
 
 """
+from datetime import datetime
 
 import pandas as pd
 from pydantic import BaseModel, ValidationError
@@ -48,7 +49,7 @@ class Booking(BaseModel):
     required_car_parking_spaces: int
     total_of_special_requests: int
     reservation_status: str
-    reservation_status_date: str
+    reservation_status_date: datetime
 
 
 class Cleaner:
@@ -58,8 +59,9 @@ class Cleaner:
 
     def __init__(self):
         self.data_frame: DataFrame = pd.read_csv("hotel_bookings.csv")
+
     @staticmethod
-    def validate_row(self, row) -> Booking | None:
+    def validate_row(row) -> Booking | None:
         """
         Validates each row in the dataframe against the Booking class.
         """
@@ -69,6 +71,31 @@ class Cleaner:
         except ValidationError as error:
             print(f"Error validating row: {error}")
             return None
+
+    @staticmethod
+    def drop_columns(df: DataFrame) -> DataFrame:
+        """
+        Removes columns from the data frame that are not needed
+        """
+        data_frame = df.drop(columns=[
+            'agent',
+            'company',
+            'required_car_parking_spaces',
+            'distribution_channel',
+        ], axis=1)
+        return data_frame
+
+    @staticmethod
+    def drop_invalid_rows(df: DataFrame) -> DataFrame:
+        """
+        Drops rows that contain values that is inconsistent.
+        """
+        # Drops rows where total number of days is zero and the booking is not cancelled
+        invalid_stay = df.query(
+            "stays_in_weekend_nights == 0 and stays_in_week_nights == 0 and is_canceled == 0"
+        )
+        df.drop(invalid_stay, axis=1, inplace=True)
+        return df
 
     def validate_data(self) -> DataFrame:
         """
@@ -82,21 +109,21 @@ class Cleaner:
         # Perform a text filling as the datatype is text
         self.data_frame["country"] = self.data_frame["country"].fillna("N/A")
 
-        # Perform a backward fill to allow data at the top to be filled
-        self.data_frame["agent"] = self.data_frame["agent"].bfill()
-        self.data_frame["company"] = self.data_frame["company"].bfill()
-
-        # Perform a backward fill to allow data from the bottom to be filled
-        self.data_frame["agent"] = self.data_frame["agent"].ffill()
-        self.data_frame["company"] = self.data_frame["company"].ffill()
-
         dropped = self.data_frame.dropna()
         valid_series = dropped.apply(self.validate_row, axis=1)
         valid_df = DataFrame([booking.dict() for booking in valid_series])
+
+        # Run the dataframe through an extra series of cleaning functions
+        # Dropping invalid columns
+        #valid_clean_df = self.drop_columns(valid_df)
+
+        # Dropping rows with inconsistent data
+        #valid_clean_df = self.drop_invalid_rows(valid_clean_df)
+
         return valid_df
 
 
 if __name__ == "__main__":
     cleaner = Cleaner()
     cleaner.validate_data()
-    # print(cleaner.validate_data())
+    print(cleaner.validate_data())
