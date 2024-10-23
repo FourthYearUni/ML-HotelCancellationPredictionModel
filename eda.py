@@ -49,23 +49,15 @@ class EDA:
         Provides a dataframe representing the grouped duration of stays.
         """
 
-        self.data_frame['bin_duration'], bin_edges = pd.qcut(
-            self.data_frame['duration'],
-            q=10,
-            retbins=True,
-            labels=False,
-            duplicates='drop'
-        )
-        bin_labels = [f'({bin_edges[i]:.1f}, {bin_edges[i + 1]:.1f})' for i in range(len(bin_edges) - 1)]
-        print(bin_labels)
+        df, bin_labels = self.fe.binning("duration")
 
         grouped = (
-            self.data_frame.groupby("bin_duration")["bin_duration"]
+            df.groupby("bin_duration")["bin_duration"]
             .count()
             .reset_index(name="count")
         )
 
-        return (grouped, bin_labels)
+        return grouped, bin_labels
 
     def get_geographical_origins(self):
         """
@@ -77,7 +69,7 @@ class EDA:
             .reset_index(name="count")
         )
 
-        return grouped
+        return grouped.sort_values(by="count", ascending=False).head(10)
 
 
 if __name__ == "__main__":
@@ -106,11 +98,17 @@ if __name__ == "__main__":
         x_axis_lbl=x_lbl_duration
     )
 
+    # Top 10 countries with the most customers
     df_geo_origins = eda.get_geographical_origins()
-    properties = df_geo_origins["country"].values.tolist()
-    values = df_geo_origins["count"].values.tolist()
-    title = "Guest country of origin"
-    labels = ["country", "count"]
-    eda.maps.choropleth_map(df_geo_origins)
-
+    properties_ctr = df_geo_origins["country"].values.tolist()
+    values_ctr = df_geo_origins["count"].values.tolist()
+    title_ctr = "Guest country of origin"
+    labels_ctr = ["country", "count"]
+    eda.charts.bar_chart(
+        values=values_ctr,
+        properties=properties_ctr,
+        y_axis_lbl=labels_ctr[1],
+        title=title_ctr,
+        x_axis_lbl=labels_ctr[0]
+    )
     pylt.show()

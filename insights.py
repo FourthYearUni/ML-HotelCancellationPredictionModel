@@ -114,7 +114,7 @@ if __name__ == "__main__":
     properties = ["% City Hotel", "% Resort Hotel"]
     y_axis_label = "Percentage of cancellation"
     title = "Percentage of cancellation per type of hotel"
-    plt_canc = plots.bar_chart(values, properties, y_axis_label, title)
+    plt_canc = plots.pie_chart(properties, values, title)
 
     # Printing information about the most ordered meals.
     values = insight.most_ordered_meals().values.tolist()
@@ -146,7 +146,12 @@ if __name__ == "__main__":
     # With a plotted crosstab in a heatmap, crosstab because it will allow us to view
     # The frequency distribution between the two columns
 
-    columns = ["reserved_room_type", "assigned_room_type"]
+    columns = ["assigned_room_type"]
     cont_tbl = insight.correlation_between_columns("is_canceled", columns)
+    cont_tbl.plot(kind="bar", rot=90, stacked=True)
+    pylt.xlabel('Assigned Room Type')
+    pylt.ylabel('Whether the booking is canceled')
+    pylt.title('Correlation between the room types and cancellation status')
     cont_tbl.to_excel("cont_table.xlsx", sheet_name="Crosstab Data")
+    map_ = maps.heat_map(cont_tbl)
     pylt.show()

@@ -9,6 +9,7 @@ It will remove any inconsistencies in the data and make it ready for analysis.
 import pandas as pd
 from pydantic import BaseModel, ValidationError
 from pandas import DataFrame
+from matplotlib import pyplot as pylt
 
 
 class Booking(BaseModel):
@@ -72,7 +73,7 @@ class Cleaner:
         """
         self.data_frame.drop(
             columns=[
-                "agent",
+
                 "company",
                 "required_car_parking_spaces",
                 "distribution_channel",
@@ -118,4 +119,12 @@ class Cleaner:
 
 if __name__ == "__main__":
     cleaner = Cleaner()
+    pylt.boxplot(cleaner.data_frame[[
+                "stays_in_week_nights",
+                "stays_in_weekend_nights",
+                "previous_cancellations",
+                "booking_changes",
+                "days_in_waiting_list"
+    ]])
+    pylt.show()
     print(cleaner.validate_data())

@@ -75,8 +75,8 @@ class Charts:
             colors=colors,
             autopct="%1.1f%%",
             startangle=90,
-            pctdistance=0.85,
-            labeldistance=1.5,
+            pctdistance=0.55,
+            labeldistance=1.0,
         )
         self.pylt.legend(properties, loc="center left", bbox_to_anchor=(1, 0.5), ncol=3)
         self.pylt.title(title)

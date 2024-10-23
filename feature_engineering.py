@@ -4,7 +4,9 @@ all in order to produce fast and effective predictions
 """
 
 import calendar
-from pandas import DataFrame, get_dummies
+from typing import Tuple, List
+
+from pandas import DataFrame, get_dummies, qcut
 
 
 class FeatureEngineering:
@@ -58,7 +60,23 @@ class FeatureEngineering:
         """
         This encodes the passed properties to create dummies that are
         exploitable in further domains. This is important especially
-        while running algorithms that rely account numerical values
+        while running algorithms that rely on account numerical values
         """
         self.data_frame = get_dummies(self.data_frame, columns=properties)
         return self.data_frame
+
+
+    def binning(self, prop:str) -> Tuple[DataFrame, List[str]]:
+        """
+        Returns a dataframe that contains the newly binned property
+        """
+        new_prop = f'bin_{prop}'
+        self.data_frame[new_prop], bin_edges = qcut(
+            self.data_frame[prop],
+            10,
+            retbins=True,
+            labels=False,
+            duplicates='drop'
+        )
+        bin_labels = [f'({bin_edges[i]:.1f}, {bin_edges[i + 1]:.1f})' for i in range(len(bin_edges) - 1)]
+        return self.data_frame, bin_labels
