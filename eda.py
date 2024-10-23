@@ -5,6 +5,9 @@ Provides modules to do exploratory data analysis on given dataframes.
 """
 
 from matplotlib import pyplot as pylt
+from sklearn.cluster import KMeans
+import pandas as pd
+
 from plots import Charts, Maps
 from cleaner import Cleaner
 
@@ -45,13 +48,24 @@ class EDA:
         """
         Provides a dataframe representing the grouped duration of stays.
         """
+
+        self.data_frame['bin_duration'], bin_edges = pd.qcut(
+            self.data_frame['duration'],
+            q=10,
+            retbins=True,
+            labels=False,
+            duplicates='drop'
+        )
+        bin_labels = [f'({bin_edges[i]:.1f}, {bin_edges[i + 1]:.1f})' for i in range(len(bin_edges) - 1)]
+        print(bin_labels)
+
         grouped = (
-            self.data_frame.groupby("duration")["duration"]
+            self.data_frame.groupby("bin_duration")["bin_duration"]
             .count()
             .reset_index(name="count")
         )
 
-        return grouped
+        return (grouped, bin_labels)
 
     def get_geographical_origins(self):
         """
@@ -79,14 +93,14 @@ if __name__ == "__main__":
 
     # Graphing the duration of guest stays in a barchart.
     df_duration = eda.duration_of_stays()
-    properties = df_duration["duration"].values.tolist()
-    values = df_duration["count"].values.tolist()
-    y_lbl_duration = "Stays"
-    x_lbl_duration = "Duration of stays"
-    title = "Duration of guest stays"
+    properties = df_duration[0]["bin_duration"].values.tolist()
+    values = df_duration[0]["count"].values.tolist()
+    y_lbl_duration = "Number of Bookings"
+    x_lbl_duration = "Range of duration"
+    title = "Range of duration of stays"
     eda.charts.bar_chart(
         values=values,
-        properties=properties,
+        properties=df_duration[1],
         y_axis_lbl=y_lbl_duration,
         title=title,
         x_axis_lbl=x_lbl_duration

@@ -7,7 +7,7 @@ Provides methods to plot data. The methods are data agnostic for reuse.
 
 import matplotlib.pyplot as pylt
 import geopandas as gpd
-
+from matplotlib.pyplot import xticks
 
 from pandas import DataFrame
 import numpy as np
@@ -32,14 +32,15 @@ class Charts:
         """
         Creates a bar chart using a list of provided values and properties.
         """
-        fig, ax = pylt.subplots()
+        fig, ax = pylt.subplots(figsize=(10, 8))
         labels = properties
         colors = [
             (random.random(), random.random(), random.random(), 1) for value in values
         ]
-        ax.bar(properties, values, label=labels, color=colors)
+        ax.bar(properties, values, label=labels, color=colors,)
         ax.set_ylabel(y_axis_lbl)
         ax.set_xlabel(x_axis_lbl)
+        ax.set_xticklabels(properties, rotation=45)
         ax.legend(title=title)
 
         return pylt
@@ -55,6 +56,7 @@ class Charts:
         self.pylt.xlabel(labels[0])
         self.pylt.ylabel(labels[1])
         self.pylt.grid(True)
+        self.pylt.xticks(rotation=90)
         return self.pylt
 
     def pie_chart(self, properties: list, values: list, title: str):

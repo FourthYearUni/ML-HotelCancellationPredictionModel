@@ -66,19 +66,20 @@ class Cleaner:
             print(f"Error validating row: {error}")
             return None
 
-    def drop_columns(self) -> DataFrame:
+    def drop_columns(self):
         """
         Removes columns from the data frame that are not needed
         """
-        self.data_frame = self.data_frame.drop(
+        self.data_frame.drop(
             columns=[
                 "agent",
                 "company",
                 "required_car_parking_spaces",
                 "distribution_channel",
             ],
+            inplace=True,
         )
-        return self.data_frame
+
 
     def drop_invalid_rows(self) -> DataFrame:
         """
@@ -104,13 +105,12 @@ class Cleaner:
         self.data_frame["country"] = self.data_frame["country"].fillna("N/A")
 
         # Remove invalid rows with invalid data
-        # self.data_frame = self.drop_invalid_rows()
-        # Remove unecessary columns
+        self.data_frame = self.drop_invalid_rows()
 
-        print(self.data_frame.columns, "Here")
-        self.data_frame = self.drop_columns()
-
+        # Remove unnecessary columns
+        self.drop_columns()
         dropped = self.data_frame.dropna()
+
         valid_series = dropped.apply(self.validate_row, axis=1)
         valid_df = DataFrame([booking.dict() for booking in valid_series])
         return valid_df
@@ -118,5 +118,4 @@ class Cleaner:
 
 if __name__ == "__main__":
     cleaner = Cleaner()
-    cleaner.validate_data()
     print(cleaner.validate_data())
