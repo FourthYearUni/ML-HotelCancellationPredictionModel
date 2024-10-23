@@ -9,7 +9,7 @@ It will remove any inconsistencies in the data and make it ready for analysis.
 import pandas as pd
 from pydantic import BaseModel, ValidationError
 from pandas import DataFrame
-import calendar
+from matplotlib import pyplot as pylt
 
 
 class Booking(BaseModel):
@@ -32,7 +32,6 @@ class Booking(BaseModel):
     meal: str
     country: str
     market_segment: str
-    distribution_channel: str
     is_repeated_guest: int
     previous_cancellations: int
     previous_bookings_not_canceled: int
@@ -40,12 +39,9 @@ class Booking(BaseModel):
     assigned_room_type: str
     booking_changes: int
     deposit_type: str
-    agent: int
-    company: int
     days_in_waiting_list: int
     customer_type: str
     adr: float
-    required_car_parking_spaces: int
     total_of_special_requests: int
     reservation_status: str
     reservation_status_date: str
@@ -59,7 +55,8 @@ class Cleaner:
     def __init__(self):
         self.data_frame: DataFrame = pd.read_csv("hotel_bookings.csv")
 
-    def validate_row(self, row) -> Booking | None:
+    @staticmethod
+    def validate_row(row) -> Booking | None:
         """
         Validates each row in the dataframe against the Booking class.
         """
@@ -69,6 +66,32 @@ class Cleaner:
         except ValidationError as error:
             print(f"Error validating row: {error}")
             return None
+
+    def drop_columns(self):
+        """
+        Removes columns from the data frame that are not needed
+        """
+        self.data_frame.drop(
+            columns=[
+
+                "company",
+                "required_car_parking_spaces",
+                "distribution_channel",
+            ],
+            inplace=True,
+        )
+
+
+    def drop_invalid_rows(self) -> DataFrame:
+        """
+        Drops rows that contain values that is inconsistent.
+        """
+        # Drops rows where total number of days is zero and the booking is not cancelled
+        invalid_stay = self.data_frame.query(
+            "stays_in_weekend_nights == 0 and stays_in_week_nights == 0 and is_canceled == 0"
+        )
+        self.data_frame = self.data_frame.drop(invalid_stay.index)
+        return self.data_frame
 
     def validate_data(self) -> DataFrame:
         """
@@ -82,15 +105,13 @@ class Cleaner:
         # Perform a text filling as the datatype is text
         self.data_frame["country"] = self.data_frame["country"].fillna("N/A")
 
-        # Perform a backward fill to allow data at the top to be filled
-        self.data_frame["agent"] = self.data_frame["agent"].bfill()
-        self.data_frame["company"] = self.data_frame["company"].bfill()
+        # Remove invalid rows with invalid data
+        self.data_frame = self.drop_invalid_rows()
 
-        # Perform a backward fill to allow data from the bottom to be filled
-        self.data_frame["agent"] = self.data_frame["agent"].ffill()
-        self.data_frame["company"] = self.data_frame["company"].ffill()
-
+        # Remove unnecessary columns
+        self.drop_columns()
         dropped = self.data_frame.dropna()
+
         valid_series = dropped.apply(self.validate_row, axis=1)
         valid_df = DataFrame([booking.dict() for booking in valid_series])
         return valid_df
@@ -98,5 +119,12 @@ class Cleaner:
 
 if __name__ == "__main__":
     cleaner = Cleaner()
-    cleaner.validate_data()
-    # print(cleaner.validate_data())
+    pylt.boxplot(cleaner.data_frame[[
+                "stays_in_week_nights",
+                "stays_in_weekend_nights",
+                "previous_cancellations",
+                "booking_changes",
+                "days_in_waiting_list"
+    ]])
+    pylt.show()
+    print(cleaner.validate_data())

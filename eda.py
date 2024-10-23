@@ -4,11 +4,14 @@ Provides modules to do exploratory data analysis on given dataframes.
 @author: Alain Mugisha(U2083264)
 """
 
-from pandas import DataFrame, Series
 from matplotlib import pyplot as pylt
-from typing import List
+from sklearn.cluster import KMeans
+import pandas as pd
+
 from plots import Charts, Maps
 from cleaner import Cleaner
+
+from feature_engineering import FeatureEngineering
 
 
 class EDA:
@@ -26,6 +29,9 @@ class EDA:
         self.cleaner = Cleaner()
         self.data_frame = self.cleaner.data_frame
 
+        self.fe = FeatureEngineering(self.data_frame)
+        self.fe.create_month_year()
+        self.fe.create_duration()
     def guests_each_month(self):
         """
         Provides of a graphical representation
@@ -42,13 +48,16 @@ class EDA:
         """
         Provides a dataframe representing the grouped duration of stays.
         """
+
+        df, bin_labels = self.fe.binning("duration")
+
         grouped = (
-            self.data_frame.groupby("duration")["duration"]
+            df.groupby("bin_duration")["bin_duration"]
             .count()
             .reset_index(name="count")
         )
 
-        return grouped
+        return grouped, bin_labels
 
     def get_geographical_origins(self):
         """
@@ -60,7 +69,7 @@ class EDA:
             .reset_index(name="count")
         )
 
-        return grouped
+        return grouped.sort_values(by="count", ascending=False).head(10)
 
 
 if __name__ == "__main__":
@@ -76,18 +85,30 @@ if __name__ == "__main__":
 
     # Graphing the duration of guest stays in a barchart.
     df_duration = eda.duration_of_stays()
-    properties = df_duration["duration"].values.tolist()
-    values = df_duration["count"].values.tolist()
-    y_lbl_duration = "Stays"
-    x_lbl_duration = "Duration of stays"
-    title = "Duration of guest stays"
-    eda.charts.bar_chart(values, properties, y_lbl_duration, title, x_lbl_duration)
+    properties = df_duration[0]["bin_duration"].values.tolist()
+    values = df_duration[0]["count"].values.tolist()
+    y_lbl_duration = "Number of Bookings"
+    x_lbl_duration = "Range of duration"
+    title = "Range of duration of stays"
+    eda.charts.bar_chart(
+        values=values,
+        properties=df_duration[1],
+        y_axis_lbl=y_lbl_duration,
+        title=title,
+        x_axis_lbl=x_lbl_duration
+    )
 
+    # Top 10 countries with the most customers
     df_geo_origins = eda.get_geographical_origins()
-    properties = df_geo_origins["country"].values.tolist()
-    values = df_geo_origins["count"].values.tolist()
-    title = "Guest country of origin"
-    labels = ["country", "count"]
-    eda.maps.choropleth_map(df_geo_origins)
-
+    properties_ctr = df_geo_origins["country"].values.tolist()
+    values_ctr = df_geo_origins["count"].values.tolist()
+    title_ctr = "Guest country of origin"
+    labels_ctr = ["country", "count"]
+    eda.charts.bar_chart(
+        values=values_ctr,
+        properties=properties_ctr,
+        y_axis_lbl=labels_ctr[1],
+        title=title_ctr,
+        x_axis_lbl=labels_ctr[0]
+    )
     pylt.show()

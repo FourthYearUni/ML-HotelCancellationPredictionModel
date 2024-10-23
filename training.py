@@ -3,7 +3,6 @@
 Provides training functionality for the cleaned and prepared
 data presented as a dataframe
 """
-
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import (
@@ -49,7 +48,6 @@ class Train:
                 "arrival_date_month",
                 "country",
                 "market_segment",
-                "distribution_channel",
                 "reserved_room_type",
                 "reservation_status_date",
                 "YearMonth",
@@ -61,7 +59,6 @@ class Train:
         """
         Splits the dataset into features and labels
         """
-        # print(self.data_frame.columns)
         x = self.data_frame[
             [
                 "stays_in_week_nights",
@@ -75,7 +72,6 @@ class Train:
                 "deposit_type_Non Refund",
                 "adr",
                 "assigned_room_type_A",
-                "agent",
                 "customer_type_Transient",
                 "market_segment_Groups",
                 "country_PRT",
@@ -101,7 +97,7 @@ class Train:
         rf.fit(x_train, y_train)
 
         y_pred = rf.predict(x_test)
-        return y_test, y_pred
+        return rf, y_test, y_pred
 
     def evaluate(self, rf, y_test, y_pred):
         """
@@ -135,4 +131,5 @@ class Train:
 
 if __name__ == "__main__":
     train = Train()
-    train.train()
+    rf, y_test, y_pred_ = train.train()
+    train.evaluate(rf, y_test, y_pred_)

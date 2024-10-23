@@ -6,10 +6,8 @@ Provides methods to plot data. The methods are data agnostic for reuse.
 """
 
 import matplotlib.pyplot as pylt
-import seaborn as sns
-import plotly.express as px
 import geopandas as gpd
-
+from matplotlib.pyplot import xticks
 
 from pandas import DataFrame
 import numpy as np
@@ -22,10 +20,9 @@ class Charts:
     """
 
     def __init__(self):
-        pass
-
+        self.pylt = pylt
+    @staticmethod
     def bar_chart(
-        self,
         values: list,
         properties: list,
         y_axis_lbl: str,
@@ -35,14 +32,15 @@ class Charts:
         """
         Creates a bar chart using a list of provided values and properties.
         """
-        fig, ax = pylt.subplots()
+        fig, ax = pylt.subplots(figsize=(10, 8))
         labels = properties
         colors = [
             (random.random(), random.random(), random.random(), 1) for value in values
         ]
-        ax.bar(properties, values, label=labels, color=colors)
+        ax.bar(properties, values, label=labels, color=colors,)
         ax.set_ylabel(y_axis_lbl)
         ax.set_xlabel(x_axis_lbl)
+        ax.set_xticklabels(properties, rotation=45)
         ax.legend(title=title)
 
         return pylt
@@ -52,13 +50,14 @@ class Charts:
         Creates a line chart using a list of provided values and properties.
         """
         # Create a line chart
-        pylt.figure(figsize=(8, 6))
-        pylt.plot(properties, values, marker="o", linestyle="-")
-        pylt.title(title)
-        pylt.xlabel(labels[0])
-        pylt.ylabel(labels[1])
-        pylt.grid(True)
-        return pylt
+        self.pylt.figure(figsize=(8, 6))
+        self.pylt.plot(properties, values, marker="o", linestyle="-")
+        self.pylt.title(title)
+        self.pylt.xlabel(labels[0])
+        self.pylt.ylabel(labels[1])
+        self.pylt.grid(True)
+        self.pylt.xticks(rotation=90)
+        return self.pylt
 
     def pie_chart(self, properties: list, values: list, title: str):
         """
@@ -76,11 +75,11 @@ class Charts:
             colors=colors,
             autopct="%1.1f%%",
             startangle=90,
-            pctdistance=0.85,
-            labeldistance=1.5,
+            pctdistance=0.55,
+            labeldistance=1.0,
         )
-        pylt.legend(properties, loc="center left", bbox_to_anchor=(1, 0.5), ncol=3)
-        pylt.title(title)
+        self.pylt.legend(properties, loc="center left", bbox_to_anchor=(1, 0.5), ncol=3)
+        self.pylt.title(title)
 
 
 class Maps:
@@ -89,30 +88,29 @@ class Maps:
     """
 
     def __init__(self):
-        pass
+        self.pylt = pylt
 
     def heat_map(self, contingency_tbl, annot=True, cmap="YlGnBu"):
         """
         Creates a heat map with the provided contigency
         """
-        pylt.imshow(contingency_tbl, cmap, aspect="auto")
-        pylt.colorbar()
-        pylt.xticks(np.arange(contingency_tbl.shape[1]), contingency_tbl.columns)
-        pylt.yticks(np.arange(contingency_tbl.shape[0]), contingency_tbl.index)
-        return pylt
+        self.pylt.imshow(contingency_tbl, cmap, aspect="auto")
+        self.pylt.colorbar()
+        self.pylt.xticks(np.arange(contingency_tbl.shape[1]), contingency_tbl.columns)
+        self.pylt.yticks(np.arange(contingency_tbl.shape[0]), contingency_tbl.index)
+        return self.pylt
+    @staticmethod
+    def choropleth_map(df: DataFrame):
+        """
+        Returns a choropleth map
+        """
 
-    def choropleth_map(self, df: DataFrame):
-        """
-        Returs a choropleth map
-        """
         url = "https://naciscdn.org/naturalearth/110m/cultural/ne_110m_admin_0_countries.zip"
         world = gpd.read_file(url)
-        world.to_excel("output.xlsx")
         # Merge dataset / frame to add geospatial data
 
         merged_frame = world.merge(df, how="left", left_on="ISO_A3", right_on="country")
         merged_frame["country"].dropna(inplace=False)
-        merged_frame.to_excel("country.xlsx")
         fig, ax = pylt.subplots(1, 1, figsize=(14, 10))
 
         merged_frame.plot(
